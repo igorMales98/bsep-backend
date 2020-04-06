@@ -14,7 +14,7 @@ public class Generators {
     public Generators() {
     }
 
-    public IssuerData generateIssueData(PrivateKey privateKey, String firstName, String lastName, String organization,
+    public IssuerData generateIssuerData(PrivateKey privateKey, String firstName, String lastName, String organization,
                                         String organizationUnit, String country, String city, String email, String phone) {
         SecureRandom sr = new SecureRandom();
         String sn = Long.toString(Math.abs(sr.nextLong()));

@@ -1,23 +1,71 @@
 package com.bsep.model;
 
+import com.bsep.certificate.CertificateRole;
+import com.bsep.certificate.TypeOfEntity;
+
+import javax.persistence.*;
+import java.lang.reflect.Type;
+
+@Entity
 public class IssuerAndSubjectData {
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id")
+    private Long id;
+
+    @Column
     private String firstName;
+
+    @Column
     private String lastName;
+
+    @Column
     private String organization;
+
+    @Column
     private String organizationUnit;
+
+    @Column
     private String country;
+
+    @Column
     private String city;
+
+    @Column
     private String email;
+
+    @Column
     private String phone;
 
+    @Enumerated(value = EnumType.STRING)
+    private TypeOfEntity typeOfEntity;
+
+    @Transient
+    private CertificateRole certificateRole;
+
+    @Transient
     private String firstNameSubject;
+
+    @Transient
     private String lastNameSubject;
+
+    @Transient
     private String organizationSubject;
+
+    @Transient
     private String organizationUnitSubject;
+
+    @Transient
     private String countrySubject;
+
+    @Transient
     private String citySubject;
+
+    @Transient
     private String emailSubject;
+
+    @Transient
     private String phoneSubject;
 
     public IssuerAndSubjectData() {
@@ -44,6 +92,20 @@ public class IssuerAndSubjectData {
         this.emailSubject = emailSubject;
         this.phoneSubject = phoneSubject;
     }
+
+    public IssuerAndSubjectData(String firstName, String lastName, String organization, String organizationUnit,
+                                String country, String city, String email, String phone, TypeOfEntity typeOfEntity) {
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.organization = organization;
+        this.organizationUnit = organizationUnit;
+        this.country = country;
+        this.city = city;
+        this.email = email;
+        this.phone = phone;
+        this.typeOfEntity = typeOfEntity;
+    }
+
 
     public String getFirstName() {
         return firstName;
@@ -171,5 +233,29 @@ public class IssuerAndSubjectData {
 
     public void setPhoneSubject(String phoneSubject) {
         this.phoneSubject = phoneSubject;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public TypeOfEntity getTypeOfEntity() {
+        return typeOfEntity;
+    }
+
+    public void setTypeOfEntity(TypeOfEntity typeOfEntity) {
+        this.typeOfEntity = typeOfEntity;
+    }
+
+    public CertificateRole getCertificateRole() {
+        return certificateRole;
+    }
+
+    public void setCertificateRole(CertificateRole certificateRole) {
+        this.certificateRole = certificateRole;
     }
 }
