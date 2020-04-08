@@ -1,13 +1,11 @@
 package com.bsep.controller;
 
 import com.bsep.model.IssuerAndSubjectData;
-import com.bsep.model.IssuerData;
 import com.bsep.service.CertificateService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 
@@ -30,4 +28,5 @@ public class CertificateController {
         }
         return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
     }
+
 }
