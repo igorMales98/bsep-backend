@@ -25,9 +25,9 @@ public class CertificateController {
 
     @PostMapping(value = "/issueCertificate/{keyStorePassword}")
     // @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<?> issueCertificate(@RequestBody IssuerAndSubjectData issuerAndSubjectData,@PathVariable("keyStorePassword") String keyStorePassword) {
+    public ResponseEntity<?> issueCertificate(@RequestBody IssuerAndSubjectData issuerAndSubjectData, @PathVariable("keyStorePassword") String keyStorePassword) {
         try {
-            this.certificateService.issueCertificate(issuerAndSubjectData,keyStorePassword);
+            this.certificateService.issueCertificate(issuerAndSubjectData, keyStorePassword);
             return new ResponseEntity<>(HttpStatus.OK);
         } catch (IOException e) {
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);

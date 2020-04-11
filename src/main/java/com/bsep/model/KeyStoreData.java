@@ -1,5 +1,7 @@
 package com.bsep.model;
 
+import com.sun.javafx.css.StyleCache;
+
 import javax.persistence.*;
 
 @Entity
@@ -17,6 +19,11 @@ public class KeyStoreData {
     private String password;
 
     public KeyStoreData() {
+    }
+
+    public KeyStoreData(String name, String password) {
+        this.name = name;
+        this.password = password;
     }
 
     public Long getId() {

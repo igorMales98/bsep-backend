@@ -60,7 +60,7 @@ public class CertificateServiceImpl implements CertificateService {
 
         X509Certificate certificate = certificateGenerator.generateCertificate(subjectData, issuerData);
 
-        saveCertificate(issuerAndSubjectData.getCertificateRole(),"sifra",certificate.getSerialNumber().toString(),keyStorePassword,keyPairIssuer.getPrivate(),certificate);
+        saveCertificate(issuerAndSubjectData.getCertificateRole(), "sifra", certificate.getSerialNumber().toString(), keyStorePassword, keyPairIssuer.getPrivate(), certificate);
 
         System.out.println("\n===== Podaci o izdavacu sertifikata =====");
         System.out.println(certificate.getIssuerX500Principal().getName());
@@ -73,26 +73,7 @@ public class CertificateServiceImpl implements CertificateService {
 
     }
 
-    public void createKeyStore(String type, String keyStorePassword) {
-        String file = ("keystores/" + type + ".jks");
-        try {
-            KeyStore keyStore = KeyStore.getInstance("JKS", "SUN");
-            keyStore.load(null, keyStorePassword.toCharArray());
-            keyStore.store(new FileOutputStream(file), keyStorePassword.toCharArray());
-        } catch (KeyStoreException e) {
-            e.printStackTrace();
-        } catch (NoSuchProviderException e) {
-            e.printStackTrace();
-        } catch (CertificateException e) {
-            e.printStackTrace();
-        } catch (NoSuchAlgorithmException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    public void saveCertificate(CertificateRole role, String keyPassword, String alias, String keyStorePassword, PrivateKey privateKey, Certificate certificate) throws NoSuchProviderException, KeyStoreException, CertificateException, NoSuchAlgorithmException, IOException {
+    public void saveCertificate(CertificateRole role, String keyPassword, String alias, String keyStorePassword, PrivateKey privateKey, Certificate certificate) throws NoSuchProviderException, KeyStoreException {
         String type = role.toString().toLowerCase();
         String file = ("keystores/" + type + ".jks");
         KeyStore keyStore = KeyStore.getInstance("JKS", "SUN");
@@ -100,16 +81,27 @@ public class CertificateServiceImpl implements CertificateService {
         certificates[0] = certificate;
         try {
             keyStore.load(new FileInputStream(file), keyStorePassword.toCharArray());
-            keyStore.setKeyEntry(alias, privateKey, keyPassword.toCharArray(), certificates); //save cert
         } catch (FileNotFoundException e) {
-            createKeyStore(type, keyStorePassword);
-            saveCertificate(role, keyPassword, alias, keyStorePassword, privateKey, certificate);
+            createKeyStore(type, keyStorePassword, keyStore);
+            // saveCertificate(role, keyPassword, alias, keyStorePassword, privateKey, certificate);
         } catch (IOException e) {
             System.out.println("Pogresna lozinka");
-        }catch (NoSuchAlgorithmException | CertificateException e) {
+        } catch (NoSuchAlgorithmException | CertificateException e) {
             e.printStackTrace();
         }
 
+        keyStore.setKeyEntry(alias, privateKey, keyPassword.toCharArray(), certificates); //save cert
+
+    }
+
+    private void createKeyStore(String type, String keyStorePassword, KeyStore keyStore) {
+        String file = ("keystores/" + type + ".jks");
+        try {
+            keyStore.load(null, keyStorePassword.toCharArray());
+            keyStore.store(new FileOutputStream(file), keyStorePassword.toCharArray());
+        } catch (KeyStoreException | IOException | CertificateException | NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        }
     }
 
 }

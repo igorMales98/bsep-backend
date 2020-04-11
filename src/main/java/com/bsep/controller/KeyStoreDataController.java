@@ -20,7 +20,7 @@ public class KeyStoreDataController {
     private KeyStoreDataService keyStoreDataService;
 
     @PostMapping(value = "/setPassword")
-  //  @PreAuthorize("hasRole('ADMIN')")
+    //  @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> setPassword(@RequestBody KeyStoreData keyStoreData) {
         try {
             this.keyStoreDataService.setPassword(keyStoreData);
@@ -32,15 +32,15 @@ public class KeyStoreDataController {
     }
 
     @GetMapping(value = "/load/{certificateRole}")
-   // @PreAuthorize("hasRole('ADMIN')")
+    // @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> load(@PathVariable("certificateRole") String certificateRole) {
         System.out.println("Usao u load");
-        return new ResponseEntity<>(this.keyStoreDataService.load(certificateRole),HttpStatus.OK);
+        return new ResponseEntity<>(this.keyStoreDataService.load(certificateRole), HttpStatus.OK);
     }
 
-    @PostMapping(value = "/checkPassword")
-   // @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<?> checkPassword(@RequestBody KeyStoreData keyStoreData) {
-        return new ResponseEntity<>(this.keyStoreDataService.checkPassword(keyStoreData),HttpStatus.OK);
+    @GetMapping(value = "/checkPassword/{name}/{password}")
+    // @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<?> checkPassword(@PathVariable("name") String name, @PathVariable("password") String password) {
+        return new ResponseEntity<>(this.keyStoreDataService.checkPassword(new KeyStoreData(name, password)), HttpStatus.OK);
     }
 }

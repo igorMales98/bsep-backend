@@ -34,9 +34,6 @@ public class KeyStoreDataServiceImpl implements KeyStoreDataService {
 
     public boolean checkPassword(KeyStoreData keyStoreData) {
         KeyStoreData keyStore = keyStoreDataRepository.findOneByName(keyStoreData.getName());
-        if (passwordEncoder.encode(keyStoreData.getPassword()) == keyStore.getPassword())
-            return true;
-
-        return false;
+        return passwordEncoder.encode(keyStoreData.getPassword()).equals(keyStore.getPassword());
     }
 }
