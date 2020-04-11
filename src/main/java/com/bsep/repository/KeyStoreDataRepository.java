@@ -6,4 +6,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface KeyStoreDataRepository extends JpaRepository<KeyStoreData, Long> {
+    KeyStoreData findOneByName(String name);
 }

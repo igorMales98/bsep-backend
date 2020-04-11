@@ -32,7 +32,7 @@ public class CertificateServiceImpl implements CertificateService {
     private PasswordEncoder passwordEncoder;
 
     @Override
-    public void issueCertificate(IssuerAndSubjectData issuerAndSubjectData) throws NoSuchAlgorithmException, CertificateException, NoSuchProviderException, KeyStoreException, IOException {
+    public void issueCertificate(IssuerAndSubjectData issuerAndSubjectData, String keyStorePassword) throws NoSuchAlgorithmException, CertificateException, NoSuchProviderException, KeyStoreException, IOException {
 
         IssuerAndSubjectData issuerDataToDB = new IssuerAndSubjectData(issuerAndSubjectData.getFirstName(), issuerAndSubjectData.getLastName(),
                 issuerAndSubjectData.getOrganization(), issuerAndSubjectData.getOrganizationUnit(), issuerAndSubjectData.getCountry(),
@@ -60,7 +60,7 @@ public class CertificateServiceImpl implements CertificateService {
 
         X509Certificate certificate = certificateGenerator.generateCertificate(subjectData, issuerData);
 
-        saveCertificate(issuerAndSubjectData.getCertificateRole(),"sifra",certificate.getSerialNumber().toString(),"sifrakeystore",keyPairIssuer.getPrivate(),certificate);
+        saveCertificate(issuerAndSubjectData.getCertificateRole(),"sifra",certificate.getSerialNumber().toString(),keyStorePassword,keyPairIssuer.getPrivate(),certificate);
 
         System.out.println("\n===== Podaci o izdavacu sertifikata =====");
         System.out.println(certificate.getIssuerX500Principal().getName());
@@ -104,7 +104,9 @@ public class CertificateServiceImpl implements CertificateService {
         } catch (FileNotFoundException e) {
             createKeyStore(type, keyStorePassword);
             saveCertificate(role, keyPassword, alias, keyStorePassword, privateKey, certificate);
-        } catch (IOException | NoSuchAlgorithmException | CertificateException e) {
+        } catch (IOException e) {
+            System.out.println("Pogresna lozinka");
+        }catch (NoSuchAlgorithmException | CertificateException e) {
             e.printStackTrace();
         }
 
