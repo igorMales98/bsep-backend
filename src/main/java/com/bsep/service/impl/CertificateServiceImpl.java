@@ -8,6 +8,7 @@ import com.bsep.model.IssuerData;
 import com.bsep.model.SubjectData;
 import com.bsep.repository.IssuerAndSubjectDataRepository;
 import com.bsep.service.CertificateService;
+import com.bsep.service.KeyStoreDataService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -29,31 +30,54 @@ public class CertificateServiceImpl implements CertificateService {
     private IssuerAndSubjectDataRepository issuerAndSubjectDataRepository;
 
     @Autowired
-    private PasswordEncoder passwordEncoder;
+    private KeyStoreDataService keyStoreDataService;
 
     @Override
     public void issueCertificate(IssuerAndSubjectData issuerAndSubjectData, String keyStorePassword) throws NoSuchAlgorithmException, CertificateException, NoSuchProviderException, KeyStoreException, IOException {
 
-        IssuerAndSubjectData issuerDataToDB = new IssuerAndSubjectData(issuerAndSubjectData.getFirstName(), issuerAndSubjectData.getLastName(),
-                issuerAndSubjectData.getOrganization(), issuerAndSubjectData.getOrganizationUnit(), issuerAndSubjectData.getCountry(),
-                issuerAndSubjectData.getCity(), issuerAndSubjectData.getEmail(), issuerAndSubjectData.getPhone(), issuerAndSubjectData.getTypeOfEntity());
-        issuerAndSubjectDataRepository.save(issuerDataToDB);
+        if (this.keyStoreDataService.doesKeyStoreExist("keystores/" + issuerAndSubjectData.getCertificateRole().toString().toLowerCase() + ".jks")) {
+            try {
+                KeyStore keyStore = KeyStore.getInstance("JKS", "SUN");
+                keyStore.load(new FileInputStream("keystores/" + issuerAndSubjectData.getCertificateRole().toString().toLowerCase() + ".jks"), keyStorePassword.toCharArray());
+            } catch (Exception e) {
+                System.out.println("Pogresna sifra odmah");
+                throw new KeyStoreException();
+            }
+        }
+
+
+        Long issuerId;
+        Long subjectId;
 
         if (!issuerAndSubjectData.getCertificateRole().equals(CertificateRole.SELF_SIGNED)) {
             IssuerAndSubjectData subjectDataToDB = new IssuerAndSubjectData(issuerAndSubjectData.getFirstNameSubject(), issuerAndSubjectData.getLastNameSubject(),
                     issuerAndSubjectData.getOrganizationSubject(), issuerAndSubjectData.getOrganizationUnitSubject(), issuerAndSubjectData.getCountrySubject(),
-                    issuerAndSubjectData.getCitySubject(), issuerAndSubjectData.getEmailSubject(), issuerAndSubjectData.getPhoneSubject(), issuerAndSubjectData.getTypeOfEntity());
+                    issuerAndSubjectData.getCitySubject(), issuerAndSubjectData.getEmailSubject(), issuerAndSubjectData.getPhoneSubject(), issuerAndSubjectData.getTypeOfEntity(),
+                    issuerAndSubjectData.getCertificateRole());
             issuerAndSubjectDataRepository.save(subjectDataToDB);
+        } else {
+            IssuerAndSubjectData issuerDataToDB = new IssuerAndSubjectData(issuerAndSubjectData.getFirstName(), issuerAndSubjectData.getLastName(),
+                    issuerAndSubjectData.getOrganization(), issuerAndSubjectData.getOrganizationUnit(), issuerAndSubjectData.getCountry(),
+                    issuerAndSubjectData.getCity(), issuerAndSubjectData.getEmail(), issuerAndSubjectData.getPhone(), issuerAndSubjectData.getTypeOfEntity(),
+                    issuerAndSubjectData.getCertificateRole());
+            issuerAndSubjectDataRepository.save(issuerDataToDB);
+        }
+
+        issuerId = issuerAndSubjectDataRepository.findByEmail(issuerAndSubjectData.getEmail()).getId();
+        if (issuerAndSubjectData.getCertificateRole().equals(CertificateRole.SELF_SIGNED)) {
+            subjectId = issuerId;
+        } else {
+            subjectId = issuerAndSubjectDataRepository.findByEmail(issuerAndSubjectData.getEmailSubject()).getId();
         }
 
         KeyPair keyPairIssuer = generators.generateKeyPair();
 
-        SubjectData subjectData = generators.generateSubjectData(issuerAndSubjectData.getFirstNameSubject(), issuerAndSubjectData.getLastNameSubject(),
+        SubjectData subjectData = generators.generateSubjectData(subjectId, issuerAndSubjectData.getFirstNameSubject(), issuerAndSubjectData.getLastNameSubject(),
                 issuerAndSubjectData.getOrganizationSubject(), issuerAndSubjectData.getOrganizationUnitSubject(), issuerAndSubjectData.getCountrySubject(),
                 issuerAndSubjectData.getCitySubject(), issuerAndSubjectData.getEmailSubject(), issuerAndSubjectData.getPhoneSubject());
 
 
-        IssuerData issuerData = generators.generateIssuerData(keyPairIssuer.getPrivate(), issuerAndSubjectData.getFirstName(), issuerAndSubjectData.getLastName(),
+        IssuerData issuerData = generators.generateIssuerData(issuerId, keyPairIssuer.getPrivate(), issuerAndSubjectData.getFirstName(), issuerAndSubjectData.getLastName(),
                 issuerAndSubjectData.getOrganization(), issuerAndSubjectData.getOrganizationUnit(), issuerAndSubjectData.getCountry(),
                 issuerAndSubjectData.getCity(), issuerAndSubjectData.getEmail(), issuerAndSubjectData.getPhone());
 
@@ -77,21 +101,19 @@ public class CertificateServiceImpl implements CertificateService {
         String type = role.toString().toLowerCase();
         String file = ("keystores/" + type + ".jks");
         KeyStore keyStore = KeyStore.getInstance("JKS", "SUN");
-        /*X509Certificate[] certificates = new X509Certificate[100];
-        certificates[0] = certificate;*/
+
         try {
             keyStore.load(new FileInputStream(file), keyStorePassword.toCharArray());
         } catch (FileNotFoundException e) {
             System.out.println("nisam ga nasao");
             createKeyStore(type, keyStorePassword, keyStore);
-            // saveCertificate(role, keyPassword, alias, keyStorePassword, privateKey, certificate);
         } catch (IOException e) {
             System.out.println("Pogresna lozinka");
         } catch (NoSuchAlgorithmException | CertificateException e) {
             e.printStackTrace();
         }
         System.out.println("ovde pise koliko ima pre cuvanja " + keyStore.size());
-        keyStore.setKeyEntry(alias, privateKey, keyPassword.toCharArray(), new Certificate[] {certificate}); //save cert
+        keyStore.setKeyEntry(alias, privateKey, keyPassword.toCharArray(), new Certificate[]{certificate}); //save cert
         System.out.println("ovde pise koliko ima posle cuvanja " + keyStore.size());
         keyStore.store(new FileOutputStream(file), keyStorePassword.toCharArray());
     }
