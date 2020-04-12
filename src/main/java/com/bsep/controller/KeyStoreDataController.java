@@ -2,6 +2,7 @@ package com.bsep.controller;
 
 import com.bsep.model.KeyStoreData;
 import com.bsep.service.KeyStoreDataService;
+import org.bouncycastle.jcajce.provider.asymmetric.X509;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,6 +18,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
 
 @CrossOrigin(origins = "http://localhost:4200")
 @RestController
@@ -51,32 +53,24 @@ public class KeyStoreDataController {
     }
 
     @GetMapping(value = "/loadCertificate/{role}/{alias}/{password}")
-    public Certificate loadCertificate(@PathVariable("role")String role, @PathVariable("alias") String alias, @PathVariable("password") String password) {
+    public ResponseEntity<?> loadCertificate(@PathVariable("role")String role, @PathVariable("alias") String alias, @PathVariable("password") String password) {
         try {
             //kreiramo instancu KeyStore
             KeyStore ks = KeyStore.getInstance("JKS", "SUN");
             //ucitavamo podatke
             String keyStoreFile = "keystores/" + role.toLowerCase() + ".jks";
-            BufferedInputStream in = new BufferedInputStream(new FileInputStream(keyStoreFile));
-            ks.load(in, password.toCharArray());
+            ks.load(new FileInputStream(keyStoreFile), password.toCharArray());
 
-            if(ks.isKeyEntry(alias)) {
-                Certificate cert = ks.getCertificate(alias);
-                return cert;
+            System.out.println("velicina key stora" + ks.size());
+            System.out.println("Ovde je dosao znaci ima fajla. i ovo je alias " + alias);
+            if(ks.containsAlias(alias)) {
+                System.out.println("Stampa ako postoji sa alijasom");
+                X509Certificate cert = (X509Certificate) ks.getCertificate(alias);
+                return new ResponseEntity<>(cert.getIssuerX500Principal(), HttpStatus.OK);
             }
-        } catch (KeyStoreException e) {
-            e.printStackTrace();
-        } catch (NoSuchProviderException e) {
-            e.printStackTrace();
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (NoSuchAlgorithmException e) {
-            e.printStackTrace();
-        } catch (CertificateException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
+        } catch (KeyStoreException | NoSuchProviderException | CertificateException | NoSuchAlgorithmException | IOException e) {
             e.printStackTrace();
         }
-        return null;
+        return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
     }
 }

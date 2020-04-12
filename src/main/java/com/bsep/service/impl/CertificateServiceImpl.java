@@ -73,15 +73,16 @@ public class CertificateServiceImpl implements CertificateService {
 
     }
 
-    public void saveCertificate(CertificateRole role, String keyPassword, String alias, String keyStorePassword, PrivateKey privateKey, Certificate certificate) throws NoSuchProviderException, KeyStoreException {
+    public void saveCertificate(CertificateRole role, String keyPassword, String alias, String keyStorePassword, PrivateKey privateKey, X509Certificate certificate) throws NoSuchProviderException, KeyStoreException, IOException, CertificateException, NoSuchAlgorithmException {
         String type = role.toString().toLowerCase();
         String file = ("keystores/" + type + ".jks");
         KeyStore keyStore = KeyStore.getInstance("JKS", "SUN");
-        Certificate[] certificates = new Certificate[10000];
-        certificates[0] = certificate;
+        /*X509Certificate[] certificates = new X509Certificate[100];
+        certificates[0] = certificate;*/
         try {
             keyStore.load(new FileInputStream(file), keyStorePassword.toCharArray());
         } catch (FileNotFoundException e) {
+            System.out.println("nisam ga nasao");
             createKeyStore(type, keyStorePassword, keyStore);
             // saveCertificate(role, keyPassword, alias, keyStorePassword, privateKey, certificate);
         } catch (IOException e) {
@@ -89,9 +90,10 @@ public class CertificateServiceImpl implements CertificateService {
         } catch (NoSuchAlgorithmException | CertificateException e) {
             e.printStackTrace();
         }
-
-        keyStore.setKeyEntry(alias, privateKey, keyPassword.toCharArray(), certificates); //save cert
-
+        System.out.println("ovde pise koliko ima pre cuvanja " + keyStore.size());
+        keyStore.setKeyEntry(alias, privateKey, keyPassword.toCharArray(), new Certificate[] {certificate}); //save cert
+        System.out.println("ovde pise koliko ima posle cuvanja " + keyStore.size());
+        keyStore.store(new FileOutputStream(file), keyStorePassword.toCharArray());
     }
 
     private void createKeyStore(String type, String keyStorePassword, KeyStore keyStore) {

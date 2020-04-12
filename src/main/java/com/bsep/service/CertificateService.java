@@ -14,5 +14,4 @@ import java.security.cert.CertificateException;
 
 public interface CertificateService {
     void issueCertificate(IssuerAndSubjectData issuerAndSubjectData, String keyStorePassword) throws NoSuchAlgorithmException, CertificateException, NoSuchProviderException, KeyStoreException, IOException;
-    void saveCertificate(CertificateRole type, String keyPassword, String alias, String keyStorePassword, PrivateKey privateKey, Certificate certificate) throws NoSuchProviderException, KeyStoreException, CertificateException, NoSuchAlgorithmException, IOException;
 }
