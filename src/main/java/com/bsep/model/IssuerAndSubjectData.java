@@ -32,7 +32,7 @@ public class IssuerAndSubjectData {
     @Column
     private String city;
 
-    @Column
+    @Column(unique = true)
     private String email;
 
     @Column
@@ -41,7 +41,7 @@ public class IssuerAndSubjectData {
     @Enumerated(value = EnumType.STRING)
     private TypeOfEntity typeOfEntity;
 
-    @Transient
+    @Enumerated(value = EnumType.STRING)
     private CertificateRole certificateRole;
 
     @Transient
@@ -94,7 +94,8 @@ public class IssuerAndSubjectData {
     }
 
     public IssuerAndSubjectData(String firstName, String lastName, String organization, String organizationUnit,
-                                String country, String city, String email, String phone, TypeOfEntity typeOfEntity) {
+                                String country, String city, String email, String phone, TypeOfEntity typeOfEntity,
+                                CertificateRole certificateRole) {
         this.firstName = firstName;
         this.lastName = lastName;
         this.organization = organization;
@@ -104,6 +105,7 @@ public class IssuerAndSubjectData {
         this.email = email;
         this.phone = phone;
         this.typeOfEntity = typeOfEntity;
+        this.certificateRole = certificateRole;
     }
 
 

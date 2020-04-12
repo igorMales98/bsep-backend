@@ -14,21 +14,17 @@ public class Generators {
     public Generators() {
     }
 
-    public IssuerData generateIssuerData(PrivateKey privateKey, String firstName, String lastName, String organization,
+    public IssuerData generateIssuerData(Long sn, PrivateKey privateKey, String firstName, String lastName, String organization,
                                         String organizationUnit, String country, String city, String email, String phone) {
-        SecureRandom sr = new SecureRandom();
-        String sn = Long.toString(Math.abs(sr.nextLong()));
-
 
         X500NameBuilder builder = new X500NameBuilder(BCStyle.INSTANCE);
-        SecureRandom sri = new SecureRandom();
-        String sni = Long.toString(Math.abs(sr.nextLong()));
-        this.buildData(builder, firstName, lastName, organization, organizationUnit, country, city, email, phone, sni);
+
+        this.buildData(builder, firstName, lastName, organization, organizationUnit, country, city, email, phone, sn.toString());
 
         return new IssuerData(privateKey, builder.build());
     }
 
-    public SubjectData generateSubjectData(String firstName, String lastName, String organization, String organizationUnit,
+    public SubjectData generateSubjectData(Long sn, String firstName, String lastName, String organization, String organizationUnit,
                                            String country, String city, String email, String phone) {
         try {
             KeyPair keyPairSubject = generateKeyPair();
@@ -41,12 +37,10 @@ public class Generators {
             Date endDate = c.getTime();
 
             X500NameBuilder builder = new X500NameBuilder(BCStyle.INSTANCE);
-            SecureRandom sr = new SecureRandom();
-            String sn = Long.toString(Math.abs(sr.nextLong()));
-            this.buildData(builder, firstName, lastName, organization, organizationUnit, country, city, email, phone, sn);
+            this.buildData(builder, firstName, lastName, organization, organizationUnit, country, city, email, phone, sn.toString());
 
 
-            return new SubjectData(keyPairSubject.getPublic(), builder.build(), sn, startDate, endDate);
+            return new SubjectData(keyPairSubject.getPublic(), builder.build(), sn.toString(), startDate, endDate);
         } catch (Exception e) {
             e.printStackTrace();
         }

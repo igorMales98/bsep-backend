@@ -1,7 +1,6 @@
 package com.bsep.controller;
 
 import com.bsep.model.IssuerAndSubjectData;
-import com.bsep.model.IssuerData;
 import com.bsep.service.CertificateService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -9,6 +8,12 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+
+import java.io.IOException;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
+import java.security.cert.CertificateException;
 
 
 @CrossOrigin(origins = "http://localhost:4200")
@@ -19,15 +24,18 @@ public class CertificateController {
     @Autowired
     private CertificateService certificateService;
 
-    @PostMapping(value = "/issueCertificate")
-    // @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<?> issueCertificate(@RequestBody IssuerAndSubjectData issuerAndSubjectData) {
+    @PostMapping(value = "/issueCertificate/{keyStorePassword}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<?> issueCertificate(@RequestBody IssuerAndSubjectData issuerAndSubjectData, @PathVariable("keyStorePassword") String keyStorePassword) {
         try {
-            this.certificateService.issueCertificate(issuerAndSubjectData);
+            this.certificateService.issueCertificate(issuerAndSubjectData, keyStorePassword);
             return new ResponseEntity<>(HttpStatus.OK);
-        } catch (Exception e) {
+        } catch (IOException e) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        } catch (NoSuchAlgorithmException | CertificateException | NoSuchProviderException | KeyStoreException e) {
             e.printStackTrace();
         }
         return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
     }
+
 }
