@@ -39,10 +39,9 @@ public class KeyStoreDataController {
         return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
     }
 
-    @GetMapping(value = "/load/{certificateRole}")
+    @GetMapping(value = "/doesKeyStoreExist/{certificateRole}")
     // @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<?> load(@PathVariable("certificateRole") String certificateRole) {
-        System.out.println("Usao u load");
+    public ResponseEntity<?> doesKeyStoreExist(@PathVariable("certificateRole") String certificateRole) {
         return new ResponseEntity<>(this.keyStoreDataService.load(certificateRole), HttpStatus.OK);
     }
 
