@@ -1,6 +1,7 @@
 package com.bsep.model;
 
 import com.bsep.certificate.CertificateRole;
+import com.bsep.certificate.CertificateStatus;
 import com.bsep.certificate.TypeOfEntity;
 
 import javax.persistence.*;
@@ -68,6 +69,9 @@ public class IssuerAndSubjectData {
     @Transient
     private String phoneSubject;
 
+    @Enumerated(value = EnumType.STRING)
+    private CertificateStatus certificateStatus;
+
     public IssuerAndSubjectData() {
     }
 
@@ -91,6 +95,7 @@ public class IssuerAndSubjectData {
         this.citySubject = citySubject;
         this.emailSubject = emailSubject;
         this.phoneSubject = phoneSubject;
+        this.certificateStatus = CertificateStatus.VALID;
     }
 
     public IssuerAndSubjectData(String firstName, String lastName, String organization, String organizationUnit,
@@ -106,6 +111,7 @@ public class IssuerAndSubjectData {
         this.phone = phone;
         this.typeOfEntity = typeOfEntity;
         this.certificateRole = certificateRole;
+        this.certificateStatus = CertificateStatus.VALID;
     }
 
 
@@ -260,4 +266,9 @@ public class IssuerAndSubjectData {
     public void setCertificateRole(CertificateRole certificateRole) {
         this.certificateRole = certificateRole;
     }
+
+    public CertificateStatus getCertificateStatus() { return certificateStatus; }
+
+    public void setCertificateStatus(CertificateStatus certificateStatus) { this.certificateStatus = certificateStatus; }
+
 }

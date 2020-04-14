@@ -5,10 +5,12 @@ import com.bsep.service.KeyStoreDataService;
 import org.bouncycastle.jcajce.provider.asymmetric.X509;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import javax.print.attribute.standard.Media;
 import java.io.BufferedInputStream;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -47,6 +49,33 @@ public class KeyStoreDataController {
         } catch (Exception e) {
             e.printStackTrace();
         }
+        return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+    }
+
+    @PutMapping(value="/withdrawCertificate/{certificateEmail:.+}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<?> withdrawCertificate(@PathVariable("certificateEmail") String certificateEmail){
+        try {
+            keyStoreDataService.withdrawCertificate(certificateEmail);
+            return new ResponseEntity<>(HttpStatus.OK);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+
+    }
+
+
+    @GetMapping(value="/getCertificateStatus/{certificateEmail:.+}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<?> getCertificateStatus(@PathVariable("certificateEmail") String certificateEmail){
+        try {
+            return new ResponseEntity<>(keyStoreDataService.getCertificateStatus(certificateEmail), HttpStatus.OK);
+        } catch (Exception e){
+            e.printStackTrace();
+        }
+
         return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
     }
 }

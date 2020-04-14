@@ -1,6 +1,10 @@
 package com.bsep.service.impl;
 
+import com.bsep.certificate.CertificateStatus;
+import com.bsep.model.IssuerAndSubjectData;
+import com.bsep.repository.IssuerAndSubjectDataRepository;
 import com.bsep.service.KeyStoreDataService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
@@ -15,6 +19,9 @@ import java.security.cert.X509Certificate;
 
 @Service
 public class KeyStoreDataServiceImpl implements KeyStoreDataService {
+
+    @Autowired
+    private IssuerAndSubjectDataRepository issuerAndSubjectDataRepository;
 
 
     @Override
@@ -40,4 +47,19 @@ public class KeyStoreDataServiceImpl implements KeyStoreDataService {
         }
         return null;
     }
+
+    @Override
+    public void withdrawCertificate(String certificateEmail) {
+        IssuerAndSubjectData certificateForWithdraw = issuerAndSubjectDataRepository.findByEmail(certificateEmail);
+        certificateForWithdraw.setCertificateStatus(CertificateStatus.REVOKED);
+        issuerAndSubjectDataRepository.save(certificateForWithdraw);
+    }
+
+    @Override
+    public boolean getCertificateStatus(String certificateEmail) {
+        IssuerAndSubjectData certificate = issuerAndSubjectDataRepository.findByEmail(certificateEmail);
+        return certificate.getCertificateStatus() == CertificateStatus.VALID;
+
+    }
+
 }
