@@ -41,12 +41,15 @@ public class KeyStoreDataController {
         try {
 
             X509Certificate certificate = this.keyStoreDataService.loadCertificate(role, alias, password);
+            if (certificate == null) {
+                return new ResponseEntity<>("Certificate with this alias doesn't exist.", HttpStatus.BAD_REQUEST);
+            }
 
             return new ResponseEntity<>(certificate.getSubjectDN(), HttpStatus.OK);
 
         } catch (Exception e) {
             e.printStackTrace();
         }
-        return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>("Password is incorrect!", HttpStatus.BAD_REQUEST);
     }
 }

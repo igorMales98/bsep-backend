@@ -10,9 +10,9 @@ import com.bsep.repository.IssuerAndSubjectDataRepository;
 import com.bsep.service.CertificateService;
 import com.bsep.service.KeyStoreDataService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import javax.persistence.NonUniqueResultException;
 import java.io.*;
 import java.security.*;
 import java.security.cert.Certificate;
@@ -35,14 +35,20 @@ public class CertificateServiceImpl implements CertificateService {
     @Override
     public void issueCertificate(IssuerAndSubjectData issuerAndSubjectData, String keyStorePassword) throws NoSuchAlgorithmException, CertificateException, NoSuchProviderException, KeyStoreException, IOException {
 
-        if (this.keyStoreDataService.doesKeyStoreExist("keystores/" + issuerAndSubjectData.getCertificateRole().toString().toLowerCase() + ".jks")) {
+        if (this.keyStoreDataService.doesKeyStoreExist(issuerAndSubjectData.getCertificateRole().toString())) {
             try {
+                System.out.println("Nasao fajl");
                 KeyStore keyStore = KeyStore.getInstance("JKS", "SUN");
                 keyStore.load(new FileInputStream("keystores/" + issuerAndSubjectData.getCertificateRole().toString().toLowerCase() + ".jks"), keyStorePassword.toCharArray());
-            } catch (Exception e) {
+            } catch (IOException e) {
                 System.out.println("Pogresna sifra odmah");
                 throw new KeyStoreException();
             }
+        }
+
+        if (issuerAndSubjectDataRepository.findByEmail(issuerAndSubjectData.getEmailSubject()) != null) {
+            System.out.println("Ima mail");
+            throw new NonUniqueResultException();
         }
 
 
