@@ -16,8 +16,8 @@ import java.security.cert.X509Certificate;
 
 public interface KeyStoreDataService {
     boolean doesKeyStoreExist(String certificateRole);
-
     X509Certificate loadCertificate(String role, String alias, String password) throws NoSuchProviderException, KeyStoreException, IOException, CertificateException, NoSuchAlgorithmException;
-
+    void withdrawCertificate(String email);
+    boolean getCertificateStatus(String certificateEmail);
     void download(DownloadCertificateDTO downloadCertificateDTO) throws NoSuchAlgorithmException, CertificateException, NoSuchProviderException, KeyStoreException, IOException;
 }

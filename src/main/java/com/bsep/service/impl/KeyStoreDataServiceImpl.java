@@ -1,9 +1,15 @@
 package com.bsep.service.impl;
 
 import com.bsep.dto.DownloadCertificateDTO;
+import com.bsep.certificate.CertificateRole;
+import com.bsep.certificate.CertificateStatus;
+import com.bsep.model.IssuerAndSubjectData;
+import com.bsep.repository.IssuerAndSubjectDataRepository;
+import com.bsep.model.IssuerAndSubjectData;
 import com.bsep.service.KeyStoreDataService;
 import org.apache.tomcat.util.codec.binary.Base64;
 import org.bouncycastle.jcajce.provider.asymmetric.X509;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
@@ -17,9 +23,13 @@ import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
+import java.util.List;
 
 @Service
 public class KeyStoreDataServiceImpl implements KeyStoreDataService {
+
+    @Autowired
+    private IssuerAndSubjectDataRepository issuerAndSubjectDataRepository;
 
 
     @Override
@@ -45,6 +55,44 @@ public class KeyStoreDataServiceImpl implements KeyStoreDataService {
         }
         return null;
     }
+
+    @Override
+    public void withdrawCertificate(String certificateEmail) {
+        IssuerAndSubjectData certificateForWithdraw = issuerAndSubjectDataRepository.findByEmail(certificateEmail);
+        Long id = certificateForWithdraw.getId();
+
+        certificateForWithdraw.setCertificateStatus(CertificateStatus.REVOKED);
+        issuerAndSubjectDataRepository.save(certificateForWithdraw);
+
+        if(certificateForWithdraw.getCertificateRole().equals(CertificateRole.END_ENTITY)) {
+            certificateForWithdraw.setCertificateStatus(CertificateStatus.REVOKED);
+            issuerAndSubjectDataRepository.save(certificateForWithdraw);
+        }
+
+        List<IssuerAndSubjectData> allCertificates = issuerAndSubjectDataRepository.findAll();
+
+        if(certificateForWithdraw.getCertificateRole().equals(CertificateRole.SELF_SIGNED) || certificateForWithdraw.getCertificateRole().equals(CertificateRole.INTERMEDIATE)){
+            for(IssuerAndSubjectData c: allCertificates){
+                IssuerAndSubjectData tempCertificate = issuerAndSubjectDataRepository.findByEmail(c.getEmail());
+                if(tempCertificate.getParent() != null) {
+                    if(tempCertificate.getParent().equals(id)) {
+                        tempCertificate.setCertificateStatus(CertificateStatus.REVOKED);
+                        issuerAndSubjectDataRepository.save(c);
+                    }
+                }
+            }
+        }
+
+
+    }
+
+    @Override
+    public boolean getCertificateStatus(String certificateEmail) {
+        IssuerAndSubjectData certificate = issuerAndSubjectDataRepository.findByEmail(certificateEmail);
+        return certificate.getCertificateStatus() == CertificateStatus.VALID;
+
+    }
+
 
     @Override
     public void download(DownloadCertificateDTO downloadCertificateDTO) throws NoSuchAlgorithmException, CertificateException, NoSuchProviderException, KeyStoreException, IOException {

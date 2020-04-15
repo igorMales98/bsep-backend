@@ -60,6 +60,9 @@ public class CertificateServiceImpl implements CertificateService {
                     issuerAndSubjectData.getOrganizationSubject(), issuerAndSubjectData.getOrganizationUnitSubject(), issuerAndSubjectData.getCountrySubject(),
                     issuerAndSubjectData.getCitySubject(), issuerAndSubjectData.getEmailSubject(), issuerAndSubjectData.getPhoneSubject(), issuerAndSubjectData.getTypeOfEntity(),
                     issuerAndSubjectData.getCertificateRole());
+                    Long parentId = issuerAndSubjectDataRepository.findByEmail(issuerAndSubjectData.getEmail()).getId();
+                    subjectDataToDB.setParent(parentId);
+                    System.out.println(parentId);
             issuerAndSubjectDataRepository.save(subjectDataToDB);
         } else {
             IssuerAndSubjectData issuerDataToDB = new IssuerAndSubjectData(issuerAndSubjectData.getFirstName(), issuerAndSubjectData.getLastName(),

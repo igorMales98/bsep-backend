@@ -10,7 +10,7 @@ import java.util.Collection;
 @Repository
 public interface IssuerAndSubjectDataRepository extends JpaRepository<IssuerAndSubjectData, Long> {
 
-    @Query(value = "SELECT * FROM issuer_and_subject_data data WHERE data.email = :email", nativeQuery = true)
+    @Query(value = "SELECT * FROM issuer_and_subject_data dataa WHERE dataa.email = :email", nativeQuery = true)
     IssuerAndSubjectData findByEmail(String email);
 
     @Query(value = "SELECT * FROM issuer_and_subject_data dataa WHERE dataa.certificate_role = 'SELF_SIGNED' OR dataa.certificate_role = 'INTERMEDIATE'", nativeQuery = true)
