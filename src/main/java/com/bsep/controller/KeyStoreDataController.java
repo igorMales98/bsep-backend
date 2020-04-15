@@ -1,5 +1,6 @@
 package com.bsep.controller;
 
+import com.bsep.dto.DownloadCertificateDTO;
 import com.bsep.model.KeyStoreData;
 import com.bsep.service.KeyStoreDataService;
 import org.bouncycastle.jcajce.provider.asymmetric.X509;
@@ -43,9 +44,24 @@ public class KeyStoreDataController {
         try {
 
             X509Certificate certificate = this.keyStoreDataService.loadCertificate(role, alias, password);
+            if (certificate == null) {
+                return new ResponseEntity<>("Certificate with this alias doesn't exist.", HttpStatus.BAD_REQUEST);
+            }
 
             return new ResponseEntity<>(certificate.getSubjectDN(), HttpStatus.OK);
 
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return new ResponseEntity<>("Password is incorrect!", HttpStatus.BAD_REQUEST);
+    }
+
+    @PostMapping(value = "/download")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<?> download(@RequestBody DownloadCertificateDTO downloadCertificateDTO) {
+        try {
+            keyStoreDataService.download(downloadCertificateDTO);
+            return new ResponseEntity<>(HttpStatus.OK);
         } catch (Exception e) {
             e.printStackTrace();
         }
