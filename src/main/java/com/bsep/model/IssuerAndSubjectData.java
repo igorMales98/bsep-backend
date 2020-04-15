@@ -72,6 +72,9 @@ public class IssuerAndSubjectData {
     @Enumerated(value = EnumType.STRING)
     private CertificateStatus certificateStatus;
 
+    @Column
+    private Long parent;
+
     public IssuerAndSubjectData() {
     }
 
@@ -271,4 +274,11 @@ public class IssuerAndSubjectData {
 
     public void setCertificateStatus(CertificateStatus certificateStatus) { this.certificateStatus = certificateStatus; }
 
+    public Long getParent() {
+        return parent;
+    }
+
+    public void setParent(Long parent) {
+        this.parent = parent;
+    }
 }

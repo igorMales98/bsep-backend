@@ -1,5 +1,6 @@
 package com.bsep.service.impl;
 
+import com.bsep.certificate.CertificateRole;
 import com.bsep.certificate.CertificateStatus;
 import com.bsep.model.IssuerAndSubjectData;
 import com.bsep.repository.IssuerAndSubjectDataRepository;
@@ -16,6 +17,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
+import java.util.List;
 
 @Service
 public class KeyStoreDataServiceImpl implements KeyStoreDataService {
@@ -51,8 +53,31 @@ public class KeyStoreDataServiceImpl implements KeyStoreDataService {
     @Override
     public void withdrawCertificate(String certificateEmail) {
         IssuerAndSubjectData certificateForWithdraw = issuerAndSubjectDataRepository.findByEmail(certificateEmail);
+        Long id = certificateForWithdraw.getId();
+
         certificateForWithdraw.setCertificateStatus(CertificateStatus.REVOKED);
         issuerAndSubjectDataRepository.save(certificateForWithdraw);
+
+        if(certificateForWithdraw.getCertificateRole().equals(CertificateRole.END_ENTITY)) {
+            certificateForWithdraw.setCertificateStatus(CertificateStatus.REVOKED);
+            issuerAndSubjectDataRepository.save(certificateForWithdraw);
+        }
+
+        List<IssuerAndSubjectData> allCertificates = issuerAndSubjectDataRepository.findAll();
+
+        if(certificateForWithdraw.getCertificateRole().equals(CertificateRole.SELF_SIGNED) || certificateForWithdraw.getCertificateRole().equals(CertificateRole.INTERMEDIATE)){
+            for(IssuerAndSubjectData c: allCertificates){
+                IssuerAndSubjectData tempCertificate = issuerAndSubjectDataRepository.findByEmail(c.getEmail());
+                if(tempCertificate.getParent() != null) {
+                    if(tempCertificate.getParent().equals(id)) {
+                        tempCertificate.setCertificateStatus(CertificateStatus.REVOKED);
+                        issuerAndSubjectDataRepository.save(c);
+                    }
+                }
+            }
+        }
+
+
     }
 
     @Override
