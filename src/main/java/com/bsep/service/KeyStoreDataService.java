@@ -3,6 +3,7 @@ package com.bsep.service;
 import com.bsep.certificate.CertificateRole;
 import com.bsep.dto.DownloadCertificateDTO;
 import com.bsep.model.KeyStoreData;
+import com.itextpdf.text.DocumentException;
 import org.bouncycastle.jcajce.provider.asymmetric.X509;
 
 import java.io.FileNotFoundException;
@@ -19,5 +20,5 @@ public interface KeyStoreDataService {
     X509Certificate loadCertificate(String role, String alias, String password) throws NoSuchProviderException, KeyStoreException, IOException, CertificateException, NoSuchAlgorithmException;
     void withdrawCertificate(String email);
     boolean getCertificateStatus(String certificateEmail);
-    void download(DownloadCertificateDTO downloadCertificateDTO) throws NoSuchAlgorithmException, CertificateException, NoSuchProviderException, KeyStoreException, IOException;
+    void download(DownloadCertificateDTO downloadCertificateDTO) throws NoSuchAlgorithmException, CertificateException, NoSuchProviderException, KeyStoreException, IOException, DocumentException;
 }
