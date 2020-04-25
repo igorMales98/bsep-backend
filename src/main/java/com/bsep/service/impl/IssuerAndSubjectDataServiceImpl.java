@@ -1,6 +1,5 @@
 package com.bsep.service.impl;
 
-import com.bsep.certificate.CertificateStatus;
 import com.bsep.model.IssuerAndSubjectData;
 import com.bsep.repository.IssuerAndSubjectDataRepository;
 import com.bsep.service.IssuerAndSubjectDataService;

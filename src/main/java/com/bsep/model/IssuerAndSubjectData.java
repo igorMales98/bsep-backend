@@ -5,7 +5,6 @@ import com.bsep.certificate.CertificateStatus;
 import com.bsep.certificate.TypeOfEntity;
 
 import javax.persistence.*;
-import java.lang.reflect.Type;
 
 @Entity
 public class IssuerAndSubjectData {

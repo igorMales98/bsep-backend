@@ -1,14 +1,12 @@
 package com.bsep.service.impl;
 
+import com.bsep.certificate.CertificateStatus;
 import com.bsep.dto.DownloadCertificateDTO;
 import com.bsep.certificate.CertificateRole;
-import com.bsep.certificate.CertificateStatus;
 import com.bsep.model.IssuerAndSubjectData;
 import com.bsep.repository.IssuerAndSubjectDataRepository;
-import com.bsep.model.IssuerAndSubjectData;
 import com.bsep.service.KeyStoreDataService;
 import org.apache.tomcat.util.codec.binary.Base64;
-import org.bouncycastle.jcajce.provider.asymmetric.X509;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -16,7 +14,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
