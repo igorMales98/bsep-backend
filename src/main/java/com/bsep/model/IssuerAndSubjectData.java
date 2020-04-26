@@ -5,7 +5,6 @@ import com.bsep.certificate.CertificateStatus;
 import com.bsep.certificate.TypeOfEntity;
 
 import javax.persistence.*;
-import java.lang.reflect.Type;
 
 @Entity
 public class IssuerAndSubjectData {
@@ -69,6 +68,12 @@ public class IssuerAndSubjectData {
     @Transient
     private String phoneSubject;
 
+    @Column
+    private boolean[] keyUsage;
+
+    @Column
+    private boolean[] extendedKeyUsage;
+
     @Enumerated(value = EnumType.STRING)
     private CertificateStatus certificateStatus;
 
@@ -81,7 +86,8 @@ public class IssuerAndSubjectData {
     public IssuerAndSubjectData(String firstName, String lastName, String organization, String organizationUnit,
                                 String country, String city, String email, String phone, String firstNameSubject,
                                 String lastNameSubject, String organizationSubject, String organizationUnitSubject,
-                                String countrySubject, String citySubject, String emailSubject, String phoneSubject) {
+                                String countrySubject, String citySubject, String emailSubject, String phoneSubject,
+                                boolean[] keyUsage,boolean[] extendedKeyUsage) {
         this.firstName = firstName;
         this.lastName = lastName;
         this.organization = organization;
@@ -99,11 +105,13 @@ public class IssuerAndSubjectData {
         this.emailSubject = emailSubject;
         this.phoneSubject = phoneSubject;
         this.certificateStatus = CertificateStatus.VALID;
+        this.keyUsage = keyUsage;
+        this.extendedKeyUsage = extendedKeyUsage;
     }
 
     public IssuerAndSubjectData(String firstName, String lastName, String organization, String organizationUnit,
                                 String country, String city, String email, String phone, TypeOfEntity typeOfEntity,
-                                CertificateRole certificateRole) {
+                                CertificateRole certificateRole,boolean[] keyUsage,boolean[] extendedKeyUsage) {
         this.firstName = firstName;
         this.lastName = lastName;
         this.organization = organization;
@@ -115,8 +123,25 @@ public class IssuerAndSubjectData {
         this.typeOfEntity = typeOfEntity;
         this.certificateRole = certificateRole;
         this.certificateStatus = CertificateStatus.VALID;
+        this.keyUsage = keyUsage;
+        this.extendedKeyUsage = extendedKeyUsage;
     }
 
+    public boolean[] getExtendedKeyUsage() {
+        return extendedKeyUsage;
+    }
+
+    public void setExtendedKeyUsage(boolean[] extendedKeyUsage) {
+        this.extendedKeyUsage = extendedKeyUsage;
+    }
+
+    public boolean[] getKeyUsage() {
+        return keyUsage;
+    }
+
+    public void setKeyUsage(boolean[] keyUsage) {
+        this.keyUsage = keyUsage;
+    }
 
     public String getFirstName() {
         return firstName;

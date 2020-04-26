@@ -20,7 +20,8 @@ import java.security.cert.CertificateException;
 @CrossOrigin(origins = "http://localhost:4200")
 @RestController
 @RequestMapping(value = "/api/certificates", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
-public class CertificateController {
+public class
+CertificateController {
 
     @Autowired
     private CertificateService certificateService;

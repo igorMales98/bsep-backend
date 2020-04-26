@@ -59,16 +59,18 @@ public class CertificateServiceImpl implements CertificateService {
             IssuerAndSubjectData subjectDataToDB = new IssuerAndSubjectData(issuerAndSubjectData.getFirstNameSubject(), issuerAndSubjectData.getLastNameSubject(),
                     issuerAndSubjectData.getOrganizationSubject(), issuerAndSubjectData.getOrganizationUnitSubject(), issuerAndSubjectData.getCountrySubject(),
                     issuerAndSubjectData.getCitySubject(), issuerAndSubjectData.getEmailSubject(), issuerAndSubjectData.getPhoneSubject(), issuerAndSubjectData.getTypeOfEntity(),
-                    issuerAndSubjectData.getCertificateRole());
+                    issuerAndSubjectData.getCertificateRole(),issuerAndSubjectData.getKeyUsage(),issuerAndSubjectData.getExtendedKeyUsage());
                     Long parentId = issuerAndSubjectDataRepository.findByEmail(issuerAndSubjectData.getEmail()).getId();
                     subjectDataToDB.setParent(parentId);
                     System.out.println(parentId);
+            System.out.println("extended "+issuerAndSubjectData.getExtendedKeyUsage()[0]);
             issuerAndSubjectDataRepository.save(subjectDataToDB);
         } else {
             IssuerAndSubjectData issuerDataToDB = new IssuerAndSubjectData(issuerAndSubjectData.getFirstName(), issuerAndSubjectData.getLastName(),
                     issuerAndSubjectData.getOrganization(), issuerAndSubjectData.getOrganizationUnit(), issuerAndSubjectData.getCountry(),
                     issuerAndSubjectData.getCity(), issuerAndSubjectData.getEmail(), issuerAndSubjectData.getPhone(), issuerAndSubjectData.getTypeOfEntity(),
-                    issuerAndSubjectData.getCertificateRole());
+                    issuerAndSubjectData.getCertificateRole(),issuerAndSubjectData.getKeyUsage(),issuerAndSubjectData.getExtendedKeyUsage());
+            System.out.println("extended "+issuerAndSubjectData.getExtendedKeyUsage()[0]);
             issuerAndSubjectDataRepository.save(issuerDataToDB);
         }
 
@@ -91,6 +93,7 @@ public class CertificateServiceImpl implements CertificateService {
                 issuerAndSubjectData.getCity(), issuerAndSubjectData.getEmail(), issuerAndSubjectData.getPhone());
 
 
+
         X509Certificate certificate = certificateGenerator.generateCertificate(subjectData, issuerData);
 
         saveCertificate(issuerAndSubjectData.getCertificateRole(), "sifra", certificate.getSerialNumber().toString(), keyStorePassword, keyPairIssuer.getPrivate(), certificate);
@@ -105,6 +108,7 @@ public class CertificateServiceImpl implements CertificateService {
         System.out.println("-------------------------------------------------------");
 
     }
+
 
     public void saveCertificate(CertificateRole role, String keyPassword, String alias, String keyStorePassword, PrivateKey privateKey, X509Certificate certificate) throws NoSuchProviderException, KeyStoreException, IOException, CertificateException, NoSuchAlgorithmException {
         String type = role.toString().toLowerCase();
