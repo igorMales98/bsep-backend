@@ -1,6 +1,7 @@
 package com.bsep.service;
 
 import com.bsep.certificate.CertificateRole;
+import com.bsep.certificate.CertificateStatus;
 import com.bsep.dto.DownloadCertificateDTO;
 import com.bsep.model.KeyStoreData;
 import org.bouncycastle.jcajce.provider.asymmetric.X509;
@@ -20,4 +21,5 @@ public interface KeyStoreDataService {
     void withdrawCertificate(String email);
     boolean getCertificateStatus(String certificateEmail);
     void download(DownloadCertificateDTO downloadCertificateDTO) throws NoSuchAlgorithmException, CertificateException, NoSuchProviderException, KeyStoreException, IOException;
+    boolean checkIfCertificateIsExpired(String email);
 }

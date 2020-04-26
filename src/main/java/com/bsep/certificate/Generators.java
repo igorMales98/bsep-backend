@@ -25,25 +25,9 @@ public class Generators {
     }
 
     public SubjectData generateSubjectData(Long sn, String firstName, String lastName, String organization, String organizationUnit,
-                                           String country, String city, String email, String phone, CertificateRole role) {
+                                           String country, String city, String email, String phone, Date startDate, Date endDate) {
         try {
             KeyPair keyPairSubject = generateKeyPair();
-            Date startDate = new Date();
-            Calendar c = Calendar.getInstance();
-            c.setTime(startDate);
-
-            Date endDate;
-
-            if(role.equals(CertificateRole.SELF_SIGNED)) {
-                c.add(Calendar.YEAR, 30);
-                endDate = c.getTime();
-            } else if (role.equals(CertificateRole.INTERMEDIATE)) {
-                c.add(Calendar.YEAR, 20);
-                endDate = c.getTime();
-            } else {
-                c.add(Calendar.YEAR, 10);
-                endDate = c.getTime();
-            }
 
             X500NameBuilder builder = new X500NameBuilder(BCStyle.INSTANCE);
             this.buildData(builder, firstName, lastName, organization, organizationUnit, country, city, email, phone, sn.toString());

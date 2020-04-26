@@ -5,6 +5,7 @@ import com.bsep.certificate.CertificateStatus;
 import com.bsep.certificate.TypeOfEntity;
 
 import javax.persistence.*;
+import java.util.Date;
 
 @Entity
 public class IssuerAndSubjectData {
@@ -73,6 +74,12 @@ public class IssuerAndSubjectData {
 
     @Column
     private Long parent;
+
+    @Column
+    private Date startDate;
+
+    @Column
+    private Date endDate;
 
     public IssuerAndSubjectData() {
     }
@@ -279,5 +286,21 @@ public class IssuerAndSubjectData {
 
     public void setParent(Long parent) {
         this.parent = parent;
+    }
+
+    public Date getStartDate() {
+        return startDate;
+    }
+
+    public void setStartDate(Date startDate) {
+        this.startDate = startDate;
+    }
+
+    public Date getEndDate() {
+        return endDate;
+    }
+
+    public void setEndDate(Date endDate) {
+        this.endDate = endDate;
     }
 }

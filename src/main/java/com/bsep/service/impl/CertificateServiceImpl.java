@@ -18,6 +18,8 @@ import java.security.*;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
+import java.util.Calendar;
+import java.util.Date;
 
 @Service
 public class CertificateServiceImpl implements CertificateService {
@@ -51,6 +53,22 @@ public class CertificateServiceImpl implements CertificateService {
             throw new NonUniqueResultException();
         }
 
+        Date startDate = new Date();
+        Calendar c = Calendar.getInstance();
+        c.setTime(startDate);
+
+        Date endDate;
+
+        if(issuerAndSubjectData.getCertificateRole().equals(CertificateRole.SELF_SIGNED)) {
+            c.add(Calendar.YEAR, 30);
+            endDate = c.getTime();
+        } else if (issuerAndSubjectData.getCertificateRole().equals(CertificateRole.INTERMEDIATE)) {
+            c.add(Calendar.YEAR, 20);
+            endDate = c.getTime();
+        } else {
+            c.add(Calendar.YEAR, 10);
+            endDate = c.getTime();
+        }
 
         Long issuerId;
         Long subjectId;
@@ -62,13 +80,16 @@ public class CertificateServiceImpl implements CertificateService {
                     issuerAndSubjectData.getCertificateRole());
                     Long parentId = issuerAndSubjectDataRepository.findByEmail(issuerAndSubjectData.getEmail()).getId();
                     subjectDataToDB.setParent(parentId);
-                    System.out.println(parentId);
+                    subjectDataToDB.setStartDate(startDate);
+                    subjectDataToDB.setEndDate(endDate);
             issuerAndSubjectDataRepository.save(subjectDataToDB);
         } else {
             IssuerAndSubjectData issuerDataToDB = new IssuerAndSubjectData(issuerAndSubjectData.getFirstName(), issuerAndSubjectData.getLastName(),
                     issuerAndSubjectData.getOrganization(), issuerAndSubjectData.getOrganizationUnit(), issuerAndSubjectData.getCountry(),
                     issuerAndSubjectData.getCity(), issuerAndSubjectData.getEmail(), issuerAndSubjectData.getPhone(), issuerAndSubjectData.getTypeOfEntity(),
                     issuerAndSubjectData.getCertificateRole());
+                    issuerDataToDB.setStartDate(startDate);
+                    issuerDataToDB.setEndDate(endDate);
             issuerAndSubjectDataRepository.save(issuerDataToDB);
         }
 
@@ -83,7 +104,7 @@ public class CertificateServiceImpl implements CertificateService {
 
         SubjectData subjectData = generators.generateSubjectData(subjectId, issuerAndSubjectData.getFirstNameSubject(), issuerAndSubjectData.getLastNameSubject(),
                 issuerAndSubjectData.getOrganizationSubject(), issuerAndSubjectData.getOrganizationUnitSubject(), issuerAndSubjectData.getCountrySubject(),
-                issuerAndSubjectData.getCitySubject(), issuerAndSubjectData.getEmailSubject(), issuerAndSubjectData.getPhoneSubject(), issuerAndSubjectData.getCertificateRole());
+                issuerAndSubjectData.getCitySubject(), issuerAndSubjectData.getEmailSubject(), issuerAndSubjectData.getPhoneSubject(), startDate, endDate);
 
 
         IssuerData issuerData = generators.generateIssuerData(issuerId, keyPairIssuer.getPrivate(), issuerAndSubjectData.getFirstName(), issuerAndSubjectData.getLastName(),

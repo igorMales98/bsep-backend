@@ -20,6 +20,8 @@ import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 
 @Service
@@ -39,6 +41,7 @@ public class KeyStoreDataServiceImpl implements KeyStoreDataService {
     @Override
     public X509Certificate loadCertificate(String role, String alias, String password) throws NoSuchProviderException, KeyStoreException, IOException, CertificateException, NoSuchAlgorithmException {
         //kreiramo instancu KeyStore
+
         KeyStore ks = KeyStore.getInstance("JKS", "SUN");
         //ucitavamo podatke
         String keyStoreFile = "keystores/" + role.toLowerCase() + ".jks";
@@ -80,7 +83,6 @@ public class KeyStoreDataServiceImpl implements KeyStoreDataService {
             }
         }
 
-
     }
 
     @Override
@@ -89,7 +91,6 @@ public class KeyStoreDataServiceImpl implements KeyStoreDataService {
         return certificate.getCertificateStatus() == CertificateStatus.VALID;
 
     }
-
 
     @Override
     public void download(DownloadCertificateDTO downloadCertificateDTO) throws NoSuchAlgorithmException, CertificateException, NoSuchProviderException, KeyStoreException, IOException {
@@ -108,4 +109,25 @@ public class KeyStoreDataServiceImpl implements KeyStoreDataService {
 
         os.close();
     }
+
+    @Override
+    public boolean checkIfCertificateIsExpired(String email) {
+        IssuerAndSubjectData certificate = issuerAndSubjectDataRepository.findByEmail(email);
+        Calendar calendarOneToCompare = Calendar.getInstance();
+        Calendar calendarTwoToCompare = Calendar.getInstance();
+        Date currentTime = new Date();
+
+        calendarOneToCompare.setTime(currentTime);
+        calendarTwoToCompare.setTime(certificate.getEndDate());
+
+        if(calendarOneToCompare.after(calendarTwoToCompare)){
+            certificate.setCertificateStatus(CertificateStatus.EXPIRED);
+            issuerAndSubjectDataRepository.save(certificate);
+            return false;
+        }
+
+        return true;
+
+    }
+
 }
