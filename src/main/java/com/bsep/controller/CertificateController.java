@@ -19,7 +19,7 @@ import java.security.cert.CertificateException;
 
 @CrossOrigin(origins = "http://localhost:4200")
 @RestController
-@RequestMapping(value = "/api/certificates", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
+@RequestMapping(value = "/api/certificates", produces = MediaType.APPLICATION_JSON_VALUE)
 public class CertificateController {
 
     @Autowired
@@ -43,5 +43,19 @@ public class CertificateController {
         }
         return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
     }
+
+    @GetMapping(value = "/checkStatus/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<?> checkCertificateStatus(@PathVariable("id") Long id){
+        try {
+            String status = this.certificateService.checkCertificateStatus(id);
+            System.out.println(status);
+            return new ResponseEntity<>(status, HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>("Certificate with that alias doesn't exist!",HttpStatus.BAD_REQUEST);
+        }
+    }
+
+
 
 }

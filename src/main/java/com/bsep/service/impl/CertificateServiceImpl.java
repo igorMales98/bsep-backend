@@ -158,4 +158,9 @@ public class CertificateServiceImpl implements CertificateService {
         }
     }
 
+    @Override
+    public String checkCertificateStatus(Long id) {
+        return this.issuerAndSubjectDataRepository.getOne(id).getCertificateStatus().toString();
+    }
+
 }
