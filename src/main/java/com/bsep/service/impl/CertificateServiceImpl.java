@@ -20,7 +20,9 @@ import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 @Service
 public class CertificateServiceImpl implements CertificateService {
@@ -67,8 +69,8 @@ public class CertificateServiceImpl implements CertificateService {
                     subjectDataToDB.setParent(parentId);
 
             System.out.println("extended "+issuerAndSubjectData.getExtendedKeyUsage()[0]);
-            issuerAndSubjectDataRepository.save(subjectDataToDB);
-            issuerAndSubjectDataRepository.flush();
+            this.issuerAndSubjectDataRepository.save(subjectDataToDB);
+            this.issuerAndSubjectDataRepository.flush();
 
         } else {
             IssuerAndSubjectData issuerDataToDB = new IssuerAndSubjectData(issuerAndSubjectData.getFirstName(), issuerAndSubjectData.getLastName(),
@@ -76,8 +78,9 @@ public class CertificateServiceImpl implements CertificateService {
                     issuerAndSubjectData.getCity(), issuerAndSubjectData.getEmail(), issuerAndSubjectData.getPhone(), issuerAndSubjectData.getTypeOfEntity(),
                     issuerAndSubjectData.getCertificateRole(),issuerAndSubjectData.getKeyUsage(),issuerAndSubjectData.getExtendedKeyUsage());
             System.out.println("extended "+issuerAndSubjectData.getExtendedKeyUsage()[0]);
-            issuerAndSubjectDataRepository.save(issuerDataToDB);
-            issuerAndSubjectDataRepository.flush();
+            this.issuerAndSubjectDataRepository.save(issuerDataToDB);
+            this.issuerAndSubjectDataRepository.flush();
+
         }
 
         issuerId = issuerAndSubjectDataRepository.findByEmail(issuerAndSubjectData.getEmail()).getId();
@@ -96,6 +99,9 @@ public class CertificateServiceImpl implements CertificateService {
         IssuerAndSubjectData temp = this.issuerAndSubjectDataRepository.findTopByOrderByIdDesc();
         temp.setStartDate(subjectData.getStartDate());
         temp.setExpiringDate(subjectData.getEndDate());
+        if(temp.getCertificateRole().equals(CertificateRole.SELF_SIGNED)) {
+            temp.setParent(temp.getId());
+        }
         this.issuerAndSubjectDataRepository.save(temp);
 
         IssuerData issuerData = generators.generateIssuerData(issuerId, keyPairIssuer.getPrivate(), issuerAndSubjectData.getFirstName(), issuerAndSubjectData.getLastName(),
@@ -160,6 +166,41 @@ public class CertificateServiceImpl implements CertificateService {
             return issuerAndSubjectData.getCertificateStatus();
         }
         return issuerAndSubjectData.getCertificateStatus();
+    }
+
+    @Override
+    public void withdrawCertificate(String email) {
+
+        IssuerAndSubjectData forWithdraw = this.issuerAndSubjectDataRepository.findByEmail(email);
+        List<IssuerAndSubjectData> all = this.issuerAndSubjectDataRepository.findAll();
+
+        forWithdraw.setCertificateStatus(CertificateStatus.REVOKED);
+        this.issuerAndSubjectDataRepository.save(forWithdraw);
+
+        if(forWithdraw.getCertificateRole().equals(CertificateRole.SELF_SIGNED)){
+            for(IssuerAndSubjectData temp : all){
+                if(temp.getParent().equals(forWithdraw.getId())){
+                    temp.setCertificateStatus(CertificateStatus.REVOKED);
+                    this.issuerAndSubjectDataRepository.save(temp);
+                    if(temp.getCertificateRole().equals(CertificateRole.INTERMEDIATE)){
+                        for(IssuerAndSubjectData temp2 : all){
+                            if(temp2.getParent().equals(temp.getId())){
+                                temp2.setCertificateStatus(CertificateStatus.REVOKED);
+                                this.issuerAndSubjectDataRepository.save(temp2);
+                            }
+                        }
+                    }
+                }
+            }
+
+        } else if (forWithdraw.getCertificateRole().equals(CertificateRole.INTERMEDIATE)){
+            for(IssuerAndSubjectData temp : all){
+                if(temp.getParent().equals(forWithdraw.getId())){
+                    temp.setCertificateStatus(CertificateStatus.REVOKED);
+                    this.issuerAndSubjectDataRepository.save(temp);
+                }
+            }
+        }
     }
 
 }

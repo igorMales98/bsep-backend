@@ -68,18 +68,4 @@ public class KeyStoreDataController {
         return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
     }
 
-    @PutMapping(value="/withdrawCertificate/{certificateEmail:.+}")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<?> withdrawCertificate(@PathVariable("certificateEmail") String certificateEmail){
-        try {
-            keyStoreDataService.withdrawCertificate(certificateEmail);
-            return new ResponseEntity<>(HttpStatus.OK);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-
-    }
-
 }
