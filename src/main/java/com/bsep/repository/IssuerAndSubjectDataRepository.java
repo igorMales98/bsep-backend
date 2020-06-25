@@ -15,4 +15,6 @@ public interface IssuerAndSubjectDataRepository extends JpaRepository<IssuerAndS
 
     @Query(value = "SELECT * FROM issuer_and_subject_data dataa WHERE dataa.certificate_role = 'SELF_SIGNED' OR dataa.certificate_role = 'INTERMEDIATE'", nativeQuery = true)
     Collection<IssuerAndSubjectData> getSSAndCA();
+
+    IssuerAndSubjectData findTopByOrderByIdDesc();
 }

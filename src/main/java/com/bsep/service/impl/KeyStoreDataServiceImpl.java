@@ -89,9 +89,9 @@ public class KeyStoreDataServiceImpl implements KeyStoreDataService {
     }
 
     @Override
-    public boolean getCertificateStatus(String certificateEmail) {
+    public CertificateStatus getCertificateStatus(String certificateEmail) {
         IssuerAndSubjectData certificate = issuerAndSubjectDataRepository.findByEmail(certificateEmail);
-        return certificate.getCertificateStatus() == CertificateStatus.VALID;
+        return certificate.getCertificateStatus();
 
     }
 

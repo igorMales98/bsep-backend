@@ -82,16 +82,4 @@ public class KeyStoreDataController {
 
     }
 
-
-    @GetMapping(value="/getCertificateStatus/{certificateEmail:.+}")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<?> getCertificateStatus(@PathVariable("certificateEmail") String certificateEmail){
-        try {
-            return new ResponseEntity<>(keyStoreDataService.getCertificateStatus(certificateEmail), HttpStatus.OK);
-        } catch (Exception e){
-            e.printStackTrace();
-        }
-
-        return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-    }
 }

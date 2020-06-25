@@ -2,6 +2,7 @@ package com.bsep.service.impl;
 
 import com.bsep.certificate.CertificateGenerator;
 import com.bsep.certificate.CertificateRole;
+import com.bsep.certificate.CertificateStatus;
 import com.bsep.certificate.Generators;
 import com.bsep.model.IssuerAndSubjectData;
 import com.bsep.model.IssuerData;
@@ -18,6 +19,8 @@ import java.security.*;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
+import java.time.LocalDateTime;
+import java.util.Date;
 
 @Service
 public class CertificateServiceImpl implements CertificateService {
@@ -62,9 +65,11 @@ public class CertificateServiceImpl implements CertificateService {
                     issuerAndSubjectData.getCertificateRole(),issuerAndSubjectData.getKeyUsage(),issuerAndSubjectData.getExtendedKeyUsage());
                     Long parentId = issuerAndSubjectDataRepository.findByEmail(issuerAndSubjectData.getEmail()).getId();
                     subjectDataToDB.setParent(parentId);
-                    System.out.println(parentId);
+
             System.out.println("extended "+issuerAndSubjectData.getExtendedKeyUsage()[0]);
             issuerAndSubjectDataRepository.save(subjectDataToDB);
+            issuerAndSubjectDataRepository.flush();
+
         } else {
             IssuerAndSubjectData issuerDataToDB = new IssuerAndSubjectData(issuerAndSubjectData.getFirstName(), issuerAndSubjectData.getLastName(),
                     issuerAndSubjectData.getOrganization(), issuerAndSubjectData.getOrganizationUnit(), issuerAndSubjectData.getCountry(),
@@ -72,6 +77,7 @@ public class CertificateServiceImpl implements CertificateService {
                     issuerAndSubjectData.getCertificateRole(),issuerAndSubjectData.getKeyUsage(),issuerAndSubjectData.getExtendedKeyUsage());
             System.out.println("extended "+issuerAndSubjectData.getExtendedKeyUsage()[0]);
             issuerAndSubjectDataRepository.save(issuerDataToDB);
+            issuerAndSubjectDataRepository.flush();
         }
 
         issuerId = issuerAndSubjectDataRepository.findByEmail(issuerAndSubjectData.getEmail()).getId();
@@ -85,8 +91,12 @@ public class CertificateServiceImpl implements CertificateService {
 
         SubjectData subjectData = generators.generateSubjectData(subjectId, issuerAndSubjectData.getFirstNameSubject(), issuerAndSubjectData.getLastNameSubject(),
                 issuerAndSubjectData.getOrganizationSubject(), issuerAndSubjectData.getOrganizationUnitSubject(), issuerAndSubjectData.getCountrySubject(),
-                issuerAndSubjectData.getCitySubject(), issuerAndSubjectData.getEmailSubject(), issuerAndSubjectData.getPhoneSubject());
+                issuerAndSubjectData.getCitySubject(), issuerAndSubjectData.getEmailSubject(), issuerAndSubjectData.getPhoneSubject(), issuerAndSubjectData.getCertificateRole());
 
+        IssuerAndSubjectData temp = this.issuerAndSubjectDataRepository.findTopByOrderByIdDesc();
+        temp.setStartDate(subjectData.getStartDate());
+        temp.setExpiringDate(subjectData.getEndDate());
+        this.issuerAndSubjectDataRepository.save(temp);
 
         IssuerData issuerData = generators.generateIssuerData(issuerId, keyPairIssuer.getPrivate(), issuerAndSubjectData.getFirstName(), issuerAndSubjectData.getLastName(),
                 issuerAndSubjectData.getOrganization(), issuerAndSubjectData.getOrganizationUnit(), issuerAndSubjectData.getCountry(),
@@ -108,7 +118,6 @@ public class CertificateServiceImpl implements CertificateService {
         System.out.println("-------------------------------------------------------");
 
     }
-
 
     public void saveCertificate(CertificateRole role, String keyPassword, String alias, String keyStorePassword, PrivateKey privateKey, X509Certificate certificate) throws NoSuchProviderException, KeyStoreException, IOException, CertificateException, NoSuchAlgorithmException {
         String type = role.toString().toLowerCase();
@@ -139,6 +148,18 @@ public class CertificateServiceImpl implements CertificateService {
         } catch (KeyStoreException | IOException | CertificateException | NoSuchAlgorithmException e) {
             e.printStackTrace();
         }
+    }
+
+    @Override
+    public CertificateStatus getCertificateStatus(String email) {
+        IssuerAndSubjectData issuerAndSubjectData = this.issuerAndSubjectDataRepository.findByEmail(email);
+        Date now = new Date();
+        if(issuerAndSubjectData.getExpiringDate().before(now)){
+            issuerAndSubjectData.setCertificateStatus(CertificateStatus.EXPIRED);
+            this.issuerAndSubjectDataRepository.save(issuerAndSubjectData);
+            return issuerAndSubjectData.getCertificateStatus();
+        }
+        return issuerAndSubjectData.getCertificateStatus();
     }
 
 }

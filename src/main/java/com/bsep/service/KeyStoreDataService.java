@@ -1,6 +1,7 @@
 package com.bsep.service;
 
 import com.bsep.certificate.CertificateRole;
+import com.bsep.certificate.CertificateStatus;
 import com.bsep.dto.DownloadCertificateDTO;
 import com.bsep.model.KeyStoreData;
 import com.itextpdf.text.DocumentException;
@@ -19,6 +20,6 @@ public interface KeyStoreDataService {
     boolean doesKeyStoreExist(String certificateRole);
     X509Certificate loadCertificate(String role, String alias, String password) throws NoSuchProviderException, KeyStoreException, IOException, CertificateException, NoSuchAlgorithmException;
     void withdrawCertificate(String email);
-    boolean getCertificateStatus(String certificateEmail);
+    CertificateStatus getCertificateStatus(String certificateEmail);
     void download(DownloadCertificateDTO downloadCertificateDTO) throws NoSuchAlgorithmException, CertificateException, NoSuchProviderException, KeyStoreException, IOException, DocumentException;
 }
