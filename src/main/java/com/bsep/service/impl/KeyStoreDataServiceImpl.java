@@ -59,44 +59,6 @@ public class KeyStoreDataServiceImpl implements KeyStoreDataService {
     }
 
     @Override
-    public void withdrawCertificate(String certificateEmail) {
-        IssuerAndSubjectData certificateForWithdraw = issuerAndSubjectDataRepository.findByEmail(certificateEmail);
-        Long id = certificateForWithdraw.getId();
-
-        certificateForWithdraw.setCertificateStatus(CertificateStatus.REVOKED);
-        issuerAndSubjectDataRepository.save(certificateForWithdraw);
-
-        if (certificateForWithdraw.getCertificateRole().equals(CertificateRole.END_ENTITY)) {
-            certificateForWithdraw.setCertificateStatus(CertificateStatus.REVOKED);
-            issuerAndSubjectDataRepository.save(certificateForWithdraw);
-        }
-
-        List<IssuerAndSubjectData> allCertificates = issuerAndSubjectDataRepository.findAll();
-
-        if (certificateForWithdraw.getCertificateRole().equals(CertificateRole.SELF_SIGNED) || certificateForWithdraw.getCertificateRole().equals(CertificateRole.INTERMEDIATE)) {
-            for (IssuerAndSubjectData c : allCertificates) {
-                IssuerAndSubjectData tempCertificate = issuerAndSubjectDataRepository.findByEmail(c.getEmail());
-                if (tempCertificate.getParent() != null) {
-                    if (tempCertificate.getParent().equals(id)) {
-                        tempCertificate.setCertificateStatus(CertificateStatus.REVOKED);
-                        issuerAndSubjectDataRepository.save(c);
-                    }
-                }
-            }
-        }
-
-
-    }
-
-    @Override
-    public boolean getCertificateStatus(String certificateEmail) {
-        IssuerAndSubjectData certificate = issuerAndSubjectDataRepository.findByEmail(certificateEmail);
-        return certificate.getCertificateStatus() == CertificateStatus.VALID;
-
-    }
-
-
-    @Override
     public void download(DownloadCertificateDTO downloadCertificateDTO) throws NoSuchAlgorithmException, CertificateException, NoSuchProviderException, KeyStoreException, IOException, DocumentException {
         X509Certificate certificate = this.loadCertificate(downloadCertificateDTO.getRole(), downloadCertificateDTO.getAlias(),
                 downloadCertificateDTO.getKeyStorePassword());

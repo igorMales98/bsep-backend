@@ -1,10 +1,10 @@
 package com.bsep.controller;
 
+import com.bsep.certificate.CertificateStatus;
 import com.bsep.model.IssuerAndSubjectData;
 import com.bsep.service.CertificateService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -19,9 +19,8 @@ import java.security.cert.CertificateException;
 
 @CrossOrigin(origins = "http://localhost:4200")
 @RestController
-@RequestMapping(value = "/api/certificates", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
-public class
-CertificateController {
+@RequestMapping(value = "/api/certificates")
+public class CertificateController {
 
     @Autowired
     private CertificateService certificateService;
@@ -44,5 +43,41 @@ CertificateController {
         }
         return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
     }
+
+    @GetMapping(value="/getCertificateStatus/{certificateEmail:.+}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<?> getCertificateStatus(@PathVariable("certificateEmail") String certificateEmail){
+        try {
+            CertificateStatus certificateStatus = this.certificateService.getCertificateStatus(certificateEmail);
+            return new ResponseEntity<>(certificateStatus.toString(), HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @PutMapping(value="/{certificateEmail:.+}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<?> withdrawCertificate(@PathVariable("certificateEmail") String certificateEmail){
+        try {
+            this.certificateService.withdrawCertificate(certificateEmail);
+            return new ResponseEntity<>(HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @GetMapping(value="/{alias}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<?> checkStatus(@PathVariable("alias") Long alias){
+        try {
+            String status = this.certificateService.checkStatus(alias).toString();
+            return new ResponseEntity<>(status, HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>("Certificate with this alias does not exist!", HttpStatus.BAD_REQUEST);
+        }
+    }
+
+
+
 
 }

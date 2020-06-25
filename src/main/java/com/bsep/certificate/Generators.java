@@ -25,14 +25,20 @@ public class Generators {
     }
 
     public SubjectData generateSubjectData(Long sn, String firstName, String lastName, String organization, String organizationUnit,
-                                           String country, String city, String email, String phone) {
+                                           String country, String city, String email, String phone, CertificateRole role) {
         try {
             KeyPair keyPairSubject = generateKeyPair();
             Date startDate = new Date();
 
             Calendar c = Calendar.getInstance();
             c.setTime(startDate);
-            c.add(Calendar.YEAR, 10);
+            if(role.equals(CertificateRole.SELF_SIGNED)) {
+                c.add(Calendar.YEAR, 30);
+            } else if(role.equals(CertificateRole.INTERMEDIATE)){
+                c.add(Calendar.YEAR, 20);
+            } else {
+                c.add(Calendar.YEAR, 10);
+            }
 
             Date endDate = c.getTime();
 

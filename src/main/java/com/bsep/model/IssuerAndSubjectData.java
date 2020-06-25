@@ -3,8 +3,11 @@ package com.bsep.model;
 import com.bsep.certificate.CertificateRole;
 import com.bsep.certificate.CertificateStatus;
 import com.bsep.certificate.TypeOfEntity;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import javax.persistence.*;
+import java.time.LocalDateTime;
+import java.util.Date;
 
 @Entity
 public class IssuerAndSubjectData {
@@ -80,6 +83,12 @@ public class IssuerAndSubjectData {
     @Column
     private Long parent;
 
+    @Column
+    Date startDate;
+
+    @Column
+    Date expiringDate;
+
     public IssuerAndSubjectData() {
     }
 
@@ -125,6 +134,34 @@ public class IssuerAndSubjectData {
         this.certificateStatus = CertificateStatus.VALID;
         this.keyUsage = keyUsage;
         this.extendedKeyUsage = extendedKeyUsage;
+    }
+
+    public IssuerAndSubjectData(Long id, String firstName, String lastName, String organization, String organizationUnit, String country, String city, String email, String phone, TypeOfEntity typeOfEntity, CertificateRole certificateRole, String firstNameSubject, String lastNameSubject, String organizationSubject, String organizationUnitSubject, String countrySubject, String citySubject, String emailSubject, String phoneSubject, boolean[] keyUsage, boolean[] extendedKeyUsage, CertificateStatus certificateStatus, Long parent, Date startDate, Date expiringDate) {
+        this.id = id;
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.organization = organization;
+        this.organizationUnit = organizationUnit;
+        this.country = country;
+        this.city = city;
+        this.email = email;
+        this.phone = phone;
+        this.typeOfEntity = typeOfEntity;
+        this.certificateRole = certificateRole;
+        this.firstNameSubject = firstNameSubject;
+        this.lastNameSubject = lastNameSubject;
+        this.organizationSubject = organizationSubject;
+        this.organizationUnitSubject = organizationUnitSubject;
+        this.countrySubject = countrySubject;
+        this.citySubject = citySubject;
+        this.emailSubject = emailSubject;
+        this.phoneSubject = phoneSubject;
+        this.keyUsage = keyUsage;
+        this.extendedKeyUsage = extendedKeyUsage;
+        this.certificateStatus = certificateStatus;
+        this.parent = parent;
+        this.startDate = startDate;
+        this.expiringDate = expiringDate;
     }
 
     public boolean[] getExtendedKeyUsage() {
@@ -306,4 +343,12 @@ public class IssuerAndSubjectData {
     public void setParent(Long parent) {
         this.parent = parent;
     }
+
+    public Date getStartDate() { return startDate; }
+
+    public void setStartDate(Date startDate) { this.startDate = startDate; }
+
+    public Date getExpiringDate() { return expiringDate; }
+
+    public void setExpiringDate(Date expiringDate) { this.expiringDate = expiringDate; }
 }

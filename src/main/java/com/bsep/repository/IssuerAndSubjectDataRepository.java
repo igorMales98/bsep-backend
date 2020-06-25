@@ -13,6 +13,8 @@ public interface IssuerAndSubjectDataRepository extends JpaRepository<IssuerAndS
     @Query(value = "SELECT * FROM issuer_and_subject_data dataa WHERE dataa.email = :email", nativeQuery = true)
     IssuerAndSubjectData findByEmail(String email);
 
-    @Query(value = "SELECT * FROM issuer_and_subject_data dataa WHERE dataa.certificate_role = 'SELF_SIGNED' OR dataa.certificate_role = 'INTERMEDIATE'", nativeQuery = true)
+    @Query(value = "SELECT * FROM issuer_and_subject_data dataa WHERE dataa.certificate_role = 'SELF_SIGNED' OR dataa.certificate_role = 'INTERMEDIATE' AND dataa.certificate_status = 'VALID'", nativeQuery = true)
     Collection<IssuerAndSubjectData> getSSAndCA();
+
+    IssuerAndSubjectData findTopByOrderByIdDesc();
 }
