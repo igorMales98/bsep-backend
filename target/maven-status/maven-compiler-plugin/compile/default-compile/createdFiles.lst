@@ -1,8 +1,10 @@
 com\bsep\service\impl\AuthorityServiceImpl.class
+com\bsep\service\impl\IssuerAndSubjectDataServiceImpl.class
 com\bsep\model\Administrator.class
 com\bsep\repository\AuthorityRepository.class
 com\bsep\model\Authority.class
 com\bsep\utiils\TimeProvider.class
+com\bsep\certificate\CertificateStatus.class
 com\bsep\service\AdministratorService.class
 com\bsep\security\auth\TokenAuthenticationFilter.class
 com\bsep\config\WebSecurityConfig.class
@@ -23,3 +25,4 @@ com\bsep\security\auth\JwtAuthenticationRequest.class
 com\bsep\model\IssuerData.class
 com\bsep\model\IssuerAndSubjectData.class
 com\bsep\security\auth\RestAuthenticationEntryPoint.class
+com\bsep\service\impl\KeyStoreDataServiceImpl.class

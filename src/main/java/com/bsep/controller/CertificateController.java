@@ -55,7 +55,7 @@ public class CertificateController {
         }
     }
 
-    @PutMapping(value="/{certificateEmail:.+}")
+    @PutMapping(value="/withdraw/{certificateEmail:.+}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> withdrawCertificate(@PathVariable("certificateEmail") String certificateEmail){
         try {
