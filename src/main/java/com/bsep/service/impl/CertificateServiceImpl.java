@@ -203,4 +203,10 @@ public class CertificateServiceImpl implements CertificateService {
         }
     }
 
+    @Override
+    public CertificateStatus checkStatus(Long alias) {
+        IssuerAndSubjectData data = this.issuerAndSubjectDataRepository.findById(alias).get();
+        return data.getCertificateStatus();
+    }
+
 }

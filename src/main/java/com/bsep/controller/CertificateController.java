@@ -55,7 +55,7 @@ public class CertificateController {
         }
     }
 
-    @PutMapping(value="/withdraw/{certificateEmail:.+}")
+    @PutMapping(value="/{certificateEmail:.+}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> withdrawCertificate(@PathVariable("certificateEmail") String certificateEmail){
         try {
@@ -63,6 +63,17 @@ public class CertificateController {
             return new ResponseEntity<>(HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @GetMapping(value="/{alias}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<?> checkStatus(@PathVariable("alias") Long alias){
+        try {
+            String status = this.certificateService.checkStatus(alias).toString();
+            return new ResponseEntity<>(status, HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>("Certificate with this alias does not exist!", HttpStatus.BAD_REQUEST);
         }
     }
 

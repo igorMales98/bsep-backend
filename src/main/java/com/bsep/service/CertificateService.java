@@ -13,5 +13,6 @@ public interface CertificateService {
     void issueCertificate(IssuerAndSubjectData issuerAndSubjectData, String keyStorePassword) throws NoSuchAlgorithmException, CertificateException, NoSuchProviderException, KeyStoreException, IOException;
     CertificateStatus getCertificateStatus(String email);
     void withdrawCertificate(String email);
+    CertificateStatus checkStatus(Long alias);
 
 }
