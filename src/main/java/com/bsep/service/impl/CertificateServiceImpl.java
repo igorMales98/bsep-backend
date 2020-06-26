@@ -20,9 +20,7 @@ import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 @Service
 public class CertificateServiceImpl implements CertificateService {
@@ -64,11 +62,11 @@ public class CertificateServiceImpl implements CertificateService {
             IssuerAndSubjectData subjectDataToDB = new IssuerAndSubjectData(issuerAndSubjectData.getFirstNameSubject(), issuerAndSubjectData.getLastNameSubject(),
                     issuerAndSubjectData.getOrganizationSubject(), issuerAndSubjectData.getOrganizationUnitSubject(), issuerAndSubjectData.getCountrySubject(),
                     issuerAndSubjectData.getCitySubject(), issuerAndSubjectData.getEmailSubject(), issuerAndSubjectData.getPhoneSubject(), issuerAndSubjectData.getTypeOfEntity(),
-                    issuerAndSubjectData.getCertificateRole(),issuerAndSubjectData.getKeyUsage(),issuerAndSubjectData.getExtendedKeyUsage());
-                    Long parentId = issuerAndSubjectDataRepository.findByEmail(issuerAndSubjectData.getEmail()).getId();
-                    subjectDataToDB.setParent(parentId);
+                    issuerAndSubjectData.getCertificateRole(), issuerAndSubjectData.getKeyUsage(), issuerAndSubjectData.getExtendedKeyUsage());
+            Long parentId = issuerAndSubjectDataRepository.findByEmail(issuerAndSubjectData.getEmail()).getId();
+            subjectDataToDB.setParent(parentId);
 
-            System.out.println("extended "+issuerAndSubjectData.getExtendedKeyUsage()[0]);
+            System.out.println("extended " + issuerAndSubjectData.getExtendedKeyUsage()[0]);
             this.issuerAndSubjectDataRepository.save(subjectDataToDB);
             this.issuerAndSubjectDataRepository.flush();
 
@@ -76,8 +74,8 @@ public class CertificateServiceImpl implements CertificateService {
             IssuerAndSubjectData issuerDataToDB = new IssuerAndSubjectData(issuerAndSubjectData.getFirstName(), issuerAndSubjectData.getLastName(),
                     issuerAndSubjectData.getOrganization(), issuerAndSubjectData.getOrganizationUnit(), issuerAndSubjectData.getCountry(),
                     issuerAndSubjectData.getCity(), issuerAndSubjectData.getEmail(), issuerAndSubjectData.getPhone(), issuerAndSubjectData.getTypeOfEntity(),
-                    issuerAndSubjectData.getCertificateRole(),issuerAndSubjectData.getKeyUsage(),issuerAndSubjectData.getExtendedKeyUsage());
-            System.out.println("extended "+issuerAndSubjectData.getExtendedKeyUsage()[0]);
+                    issuerAndSubjectData.getCertificateRole(), issuerAndSubjectData.getKeyUsage(), issuerAndSubjectData.getExtendedKeyUsage());
+            System.out.println("extended " + issuerAndSubjectData.getExtendedKeyUsage()[0]);
             this.issuerAndSubjectDataRepository.save(issuerDataToDB);
             this.issuerAndSubjectDataRepository.flush();
 
@@ -99,7 +97,7 @@ public class CertificateServiceImpl implements CertificateService {
         IssuerAndSubjectData temp = this.issuerAndSubjectDataRepository.findTopByOrderByIdDesc();
         temp.setStartDate(subjectData.getStartDate());
         temp.setExpiringDate(subjectData.getEndDate());
-        if(temp.getCertificateRole().equals(CertificateRole.SELF_SIGNED)) {
+        if (temp.getCertificateRole().equals(CertificateRole.SELF_SIGNED)) {
             temp.setParent(temp.getId());
         }
         this.issuerAndSubjectDataRepository.save(temp);
@@ -107,7 +105,6 @@ public class CertificateServiceImpl implements CertificateService {
         IssuerData issuerData = generators.generateIssuerData(issuerId, keyPairIssuer.getPrivate(), issuerAndSubjectData.getFirstName(), issuerAndSubjectData.getLastName(),
                 issuerAndSubjectData.getOrganization(), issuerAndSubjectData.getOrganizationUnit(), issuerAndSubjectData.getCountry(),
                 issuerAndSubjectData.getCity(), issuerAndSubjectData.getEmail(), issuerAndSubjectData.getPhone());
-
 
 
         X509Certificate certificate = certificateGenerator.generateCertificate(subjectData, issuerData);
@@ -160,7 +157,7 @@ public class CertificateServiceImpl implements CertificateService {
     public CertificateStatus getCertificateStatus(String email) {
         IssuerAndSubjectData issuerAndSubjectData = this.issuerAndSubjectDataRepository.findByEmail(email);
         Date now = new Date();
-        if(issuerAndSubjectData.getExpiringDate().before(now)){
+        if (issuerAndSubjectData.getExpiringDate().before(now)) {
             issuerAndSubjectData.setCertificateStatus(CertificateStatus.EXPIRED);
             this.issuerAndSubjectDataRepository.save(issuerAndSubjectData);
             return issuerAndSubjectData.getCertificateStatus();
@@ -177,27 +174,44 @@ public class CertificateServiceImpl implements CertificateService {
         forWithdraw.setCertificateStatus(CertificateStatus.REVOKED);
         this.issuerAndSubjectDataRepository.save(forWithdraw);
 
-        if(forWithdraw.getCertificateRole().equals(CertificateRole.SELF_SIGNED)){
-            for(IssuerAndSubjectData temp : all){
-                if(temp.getParent().equals(forWithdraw.getId())){
-                    temp.setCertificateStatus(CertificateStatus.REVOKED);
-                    this.issuerAndSubjectDataRepository.save(temp);
-                    if(temp.getCertificateRole().equals(CertificateRole.INTERMEDIATE)){
-                        for(IssuerAndSubjectData temp2 : all){
-                            if(temp2.getParent().equals(temp.getId())){
-                                temp2.setCertificateStatus(CertificateStatus.REVOKED);
-                                this.issuerAndSubjectDataRepository.save(temp2);
-                            }
-                        }
+        List<IssuerAndSubjectData> selfSigned = new ArrayList<>();
+        List<IssuerAndSubjectData> intermediate = new ArrayList<>();
+        List<IssuerAndSubjectData> endEntity = new ArrayList<>();
+
+        for (IssuerAndSubjectData issuerAndSubjectData : all) {
+            if (issuerAndSubjectData.getCertificateRole().equals(CertificateRole.SELF_SIGNED)) {
+                selfSigned.add(issuerAndSubjectData);
+            } else if (issuerAndSubjectData.getCertificateRole().equals(CertificateRole.INTERMEDIATE)) {
+                intermediate.add(issuerAndSubjectData);
+            } else if (issuerAndSubjectData.getCertificateRole().equals(CertificateRole.END_ENTITY)) {
+                endEntity.add(issuerAndSubjectData);
+            }
+        }
+
+        Set<Long> ids = new HashSet<>();
+        ids.add(forWithdraw.getId());
+
+        if (forWithdraw.getCertificateRole().equals(CertificateRole.END_ENTITY)) {
+            System.out.println("nema decu");
+        } else {
+            for (IssuerAndSubjectData temp : intermediate) {
+                for (Long id : ids) {
+                    if (temp.getParent().equals(id)) {
+                        temp.setCertificateStatus(CertificateStatus.REVOKED);
+                        this.issuerAndSubjectDataRepository.save(temp);
+                        ids.add(temp.getId());
+                        break;
                     }
                 }
             }
 
-        } else if (forWithdraw.getCertificateRole().equals(CertificateRole.INTERMEDIATE)){
-            for(IssuerAndSubjectData temp : all){
-                if(temp.getParent().equals(forWithdraw.getId())){
-                    temp.setCertificateStatus(CertificateStatus.REVOKED);
-                    this.issuerAndSubjectDataRepository.save(temp);
+            for (IssuerAndSubjectData temp2 : endEntity) {
+                for (Long id : ids) {
+                    if (temp2.getParent().equals(id)) {
+                        temp2.setCertificateStatus(CertificateStatus.REVOKED);
+                        this.issuerAndSubjectDataRepository.save(temp2);
+                        break;
+                    }
                 }
             }
         }
